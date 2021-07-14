@@ -1,28 +1,33 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-function App() {
-  const [emotion, setEmotion] = useState("happy");
-  const [secondary, setSecondary] = useState("tired");
+// https://api.github.com/users/manubell
+
+function App({ login }) {
+  const [data, setData] = useState(null); // null to start with no state
+  const [loading, setLoading] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log(`It's ${emotion} around here!`);
-  }, [emotion]);
+    if (!login) return;
+    setLoading(true);
+    fetch(`https://api.github.com/users/${login}`)
+      .then((Response) => Response.json())
+      .then(setData)
+      .then(() => setLoading(false))
+      .catch(() => setError);
+  }, [login]); // rerender when login changes
 
-  useEffect(() => {
-    console.log(`It's ${secondary} around here!`);
-  }, [secondary]);
+  if (loading) return <h1>Loading...</h1>;
+  if (error) return <pre>{JSON.stringify(error, null, 2)})</pre>;
+  if (!data) return null;
 
   return (
-    <>
-      <h1>
-        Current emotion is {emotion} and {secondary}.
-      </h1>
-      <button onClick={() => setEmotion("Happy")}>Make Happy</button>
-      <button onClick={() => setSecondary("Crabby")}>Make crabby</button>
-      <button onClick={() => setEmotion("frustrated")}>Frustrate</button>
-      <button onClick={() => setEmotion("enthusiastic")}>enthusiastic</button>
-    </>
+    <div>
+      <h1>{data.login}</h1>
+      <p>{data.id}</p>
+      <img alt={data.login} src={data.avatar_url} />
+    </div>
   );
 }
 
